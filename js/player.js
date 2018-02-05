@@ -1,4 +1,5 @@
 /* Player */
+var NSLIB_DEFAULT_SPEED = 1.5;
 var Player = function (options) {
     this.player = options.player;
     this.diy = options.diyplayer;
@@ -11,9 +12,16 @@ var Player = function (options) {
     this.loopMode = 0;
     this.volumeValue = .8;
     this.init();
+    this.setDefaultSpeed();
 };
 
 Player.fn = Player.prototype;
+
+Player.fn.setDefaultSpeed = function () {
+    this.player.playbackRate = NSLIB_DEFAULT_SPEED;
+    this.diy.speed.speedNum.innerHTML = 'Speed: '+ this.player.playbackRate.toFixed(1);
+    return this;
+};
 
 Player.fn.setAudioListApi = function (apis) {
     this.listApis = apis;
@@ -51,7 +59,6 @@ Player.fn.prev = function () {
         this.currentAudioId = this.songLength - 1;
     }
     this.goto(this.currentAudioId);
-    this.diy.speed.speedNum.innerHTML = 'Speed: 1.0';
     return this;
 };
 
@@ -60,7 +67,6 @@ Player.fn.next = function () {
         this.currentAudioId = 0;
     }
     this.goto(this.currentAudioId);
-    this.diy.speed.speedNum.innerHTML = 'Speed: 1.0';
     return this;
 };
 
@@ -320,7 +326,7 @@ List.fn.render = function () {
             'clr' : randCLr(true)
         });
     });
-
+    
     this.options.listPlace.innerHTML = Mustache.render(this.options.listTpl, { 'lst' : tplData });
     this.options.listPlace.style.display = 'block';
     this.get(0);
@@ -383,7 +389,8 @@ List.fn.get = function (id) {
             that.options.audioPlayer.load();
             // Callback player api
             that.options.finishAudioLoad && that.options.finishAudioLoad(id, that.audios[id].name);
-            that.options.speed.speedNum.innerHTML = 'Speed: 1.0';
+            player.setDefaultSpeed();
+            // that.options.speed.speedNum.innerHTML = 'Speed: 1.0';
         };
         var handleError = function (evt) {
             console.log(evt);
