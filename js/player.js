@@ -1,5 +1,7 @@
 /* Player */
-var NSLIB_DEFAULT_SPEED = 1.5;
+var NSLIB_DEFAULT_SPEED = 1.0;
+var NSLIB_DEFAULT_VOLUME = 1;
+
 var Player = function (options) {
     this.player = options.player;
     this.diy = options.diyplayer;
@@ -10,7 +12,7 @@ var Player = function (options) {
     this.totalTime = 0;
     this.currentTime = 0;
     this.loopMode = 0;
-    this.volumeValue = .8;
+    this.volumeValue = NSLIB_DEFAULT_VOLUME;
     this.init();
     this.setDefaultSpeed();
 };
@@ -29,7 +31,7 @@ Player.fn.setAudioListApi = function (apis) {
 };
 
 Player.fn.init = function () {
-    this.setVolume(.8);
+    this.setVolume(NSLIB_DEFAULT_VOLUME);
     this.bindEvents();
     return this;
 };
@@ -296,7 +298,6 @@ List.fn.load = function (files) {
             that.audios.push(file);
         }
     });
-//    console.log(this.audios);
     this.options.dropPlace.style.display = 'none';
     this.options.finishInit.call(this, this.audios.length);
     return this;
@@ -326,11 +327,50 @@ List.fn.render = function () {
             'clr' : randCLr(true)
         });
     });
-    
+
     this.options.listPlace.innerHTML = Mustache.render(this.options.listTpl, { 'lst' : tplData });
     this.options.listPlace.style.display = 'block';
     this.get(0);
     this.reCalcLstPadding();
+
+    if (this.audios && this.audios.length > 0) {
+        console.log(this.audios[0].name);
+
+        var firstAudioName = this.audios[0].name;
+        firstAudioName = firstAudioName.substring(0, firstAudioName.length - 4);
+        var candidateFields = firstAudioName.split("_");
+        var timeList= [];
+        for (var idx = 0; idx < candidateFields.length; idx++) {
+            console.log(idx);
+            var fields = candidateFields[idx].split("-");
+            var offset = 0;
+            var humanTime = candidateFields[idx].replace('-', ':');
+            var scale = 1;
+            if (2 <= fields.length && fields.length <= 3) {
+                for (var fieldIndex = fields.length - 1; fieldIndex >= 0; fieldIndex--) {
+                    offset += parseInt(fields[fieldIndex], 10) * scale;
+                    scale *= 60;
+                }
+                timeList.push({'offset': offset, 'humanTime': humanTime});
+            }
+        }
+        this.options.setTimeBtnList.innerHTML = Mustache.render(this.options.setTimeBtnListTpl, {
+            'timeList': timeList,
+        });
+
+        var handleSetTimeBtnClick = function(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            var link = evt.target || false;
+            if (link && link.tagName.toUpperCase() == 'A' && link.dataset.aoffset) {
+                player.setCurrentTime(parseInt(link.dataset.aoffset, 10));
+            }
+            return false;
+        };
+
+        this.options.setTimeBtnList.addEventListener('click', handleSetTimeBtnClick, false);
+    }
+
     return this;
 };
 
@@ -474,6 +514,8 @@ var player = new Player({
 
 
 var lst = new List({
+    'setTimeBtnList': document.querySelector('#set-time-btn-list'),
+    'setTimeBtnListTpl': document.querySelector('#set-time-btn-list').innerHTML,
     'dropPlace' : document.querySelector('#drop-place'),
     'listPlace' : document.querySelector('#audio-list'),
     'audioPlayer' : document.querySelector('#audio-player'),

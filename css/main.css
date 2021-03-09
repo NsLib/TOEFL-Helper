@@ -42,6 +42,13 @@ body {
     height: 80px;
     background: -webkit-linear-gradient(top, rgba(255,255,255,.8) 64%, rgba(255,255,255,0) 100%);
 }
+#audio-extra-toolbar-wrapper {
+    z-index: 5;
+    width: 100%;
+    margin: 0 15px 0 15px;
+    height: 40px;
+    background: -webkit-linear-gradient(top, rgba(255,255,255,.8) 64%, rgba(255,255,255,0) 100%);
+}
 #audio-list-wrapper {
     padding-top: 20px;
     /*padding-bottom: 46px;*/
@@ -422,6 +429,9 @@ body {
     background-color: red;
 }
 
+#set-time-btn-list {
+    display: block;
+}
 
 #audio-list {
     display: none;
